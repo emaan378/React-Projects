@@ -27,7 +27,7 @@ export default function LoadMoreData() {
 
     useEffect(() => {
         fetchProducts()
-    }, [count])
+    }, [count,fetchProducts])
     useEffect(() => {
         if(products && products.length===100)setDisableButton(true)
     },[products])
