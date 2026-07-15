@@ -40,6 +40,6 @@ export default function GlobalState({children}) {
         }
     }
     console.log(recipeList)
-    return <GlobalContext.Provider value={{ favouritesList, setFavouritesList ,handleAddToFavourite, searchParam, loading, recipeList, recipeDetailsData, setRecipeDetailsData, setSearchParam, handleSubmit }}> {children} </GlobalContext.Provider>
+    return<GlobalContext.Provider value={{ favouritesList, setFavouritesList, handleAddToFavourite, searchParam, loading, recipeList, recipeDetailsData, setRecipeDetailsData, setSearchParam, handleSubmit }}> {children} </GlobalContext.Provider>
     
 }

@@ -1,90 +1,109 @@
 import { useContext, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { GlobalContext } from "../../context/";
+import { useParams, Link } from "react-router-dom"
+import { GlobalContext } from '../../context/'
 
 export default function Details() {
-    const { recipeDetailsData, setRecipeDetailsData, favouritesList ,handleAddToFavourite } = useContext(GlobalContext);
+    const { recipeDetailsData, setRecipeDetailsData, favouritesList, setFavouritesList } = useContext(GlobalContext)
     const { id } = useParams();
 
     useEffect(() => {
+        if (!id) return;
         async function getRecipeDetails() {
             try {
-                const res = await fetch(
-                    `https://forkify-api.jonas.io/api/v2/recipes/${id}`
-                );
-
+                const res = await fetch(`https://forkify-api.jonas.io/api/v2/recipes/${id}`)
                 const data = await res.json();
-
                 if (data?.data) {
-                    setRecipeDetailsData(data.data);
+                    setRecipeDetailsData(data?.data)
+                } else {
+                    setRecipeDetailsData(null)
                 }
             } catch (e) {
-                console.log(e);
+                console.log(e)
+                setRecipeDetailsData(null)
             }
         }
+        getRecipeDetails()
+    }, [id, setRecipeDetailsData])
 
-        getRecipeDetails();
-    }, [id,setRecipeDetailsData]);
+    // check karo: ye recipe pehle se favourites mein hai kya?
+    const isFavourite = favouritesList?.some(fav => fav.id === recipeDetailsData?.recipe?.id)
 
-    const recipe = recipeDetailsData?.recipe;
+    function handleFavouriteToggle() {
+        const recipe = recipeDetailsData?.recipe
+        if (!recipe) return
+
+        if (isFavourite) {
+            // agar pehle se favourite hai, to list se hata do
+            setFavouritesList(favouritesList.filter(fav => fav.id !== recipe.id))
+        } else {
+            // agar nahi hai, to add kar do
+            setFavouritesList([...favouritesList, recipe])
+        }
+    }
+
+    if (!id) {
+        return (
+            <div className="container mx-auto py-20 flex flex-col items-center gap-4">
+                <p className="text-2xl font-semibold text-gray-500">Please select a recipe first</p>
+                <Link to="/" className="text-sm py-2 px-6 rounded-lg uppercase font-medium tracking-wider shadow-md bg-black text-white hover:bg-gray-800 transition-colors duration-300">
+                    Browse Recipes
+                </Link>
+            </div>
+        )
+    }
+
+    if (!recipeDetailsData?.recipe) {
+        return (
+            <div className="min-h-[70vh] flex flex-col items-center justify-center gap-4">
+                <p className="text-2xl font-semibold text-gray-500">Recipe not found</p>
+                <Link to="/" className="text-sm py-2 px-6 rounded-lg uppercase font-medium tracking-wider shadow-md bg-black text-white hover:bg-gray-800 transition-colors duration-300">
+                    Browse Recipes
+                </Link>
+            </div>
+        )
+    }
 
     return (
-        <div className="container mx-auto px-5 py-10">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-start">
-
-                {/* Left Side */}
-                <div>
-                    <span className="text-sm uppercase tracking-widest text-red-600 font-semibold">
-                        {recipe?.publisher}
-                    </span>
-
-                    <h1 className="text-4xl font-bold mt-3 leading-tight">
-                        {recipe?.title}
-                    </h1>
-
-                    <button
-                        onClick={(() => handleAddToFavourite(recipeDetailsData?.recipe))}
-                        className="mt-8 bg-black text-white px-8 py-3 rounded-lg uppercase tracking-wider font-medium hover:bg-gray-800 duration-300"
-                    >
-                        {
-                            favouritesList.findIndex((item)=> item.id === recipeDetailsData?.recipe?.id) !== -1 ? "Remove from Favourites" : "Add into Favourites"
-                        }
-                    </button>
-
-                    <div className="mt-10">
-                        <h2 className="text-3xl font-bold mb-6">
-                            Ingredients
-                        </h2>
-
-                        <ul className="space-y-3">
-                            {recipe?.ingredients?.map((ingredient, index) => (
-                                <li
-                                    key={index}
-                                    className="flex gap-3 border-b border-gray-200 pb-3"
-                                >
-                                    <span className="font-semibold whitespace-nowrap">
-                                        {ingredient.quantity} {ingredient.unit}
-                                    </span>
-
-                                    <span className="text-gray-700">
-                                        {ingredient.description}
-                                    </span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                </div>
-
-                {/* Right Side */}
-                <div className="sticky top-10">
+        <div className="container mx-auto py-8 grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+            <div>
+                <div className="h-64 lg:h-96 overflow-hidden rounded-xl group">
                     <img
-                        src={recipe?.image_url}
-                        alt={recipe?.title}
-                        className="w-full h-[500px] object-cover rounded-2xl shadow-xl"
+                        src={recipeDetailsData?.recipe?.image_url}
+                        className="w-full h-full object-cover block group-hover:scale-105 duration-300"
+                        alt="recipe"
                     />
                 </div>
-
+            </div>
+            <div className="flex flex-col gap-3">
+                <span className="text-sm text-red-700 font-medium uppercase tracking-wide">
+                    {recipeDetailsData?.recipe?.publisher}
+                </span>
+                <h3 className="font-bold text-3xl text-black">
+                    {recipeDetailsData?.recipe?.title}
+                </h3>
+                <button
+                    onClick={handleFavouriteToggle}
+                    className={`text-sm p-3 px-8 rounded-lg uppercase mt-5 font-medium tracking-wider shadow-md transition-colors duration-300 w-fit ${isFavourite
+                            ? "bg-white text-black border-2 border-black hover:bg-gray-100"
+                            : "bg-black text-white hover:bg-gray-800"
+                        }`}
+                >
+                    {isFavourite ? "Remove from favourites" : "Save as favourites"}
+                </button>
+                <div className="mt-6">
+                    <span className="text-2xl font-bold text-black">Ingredients</span>
+                    <ul className="flex flex-col gap-2 mt-4">
+                        {recipeDetailsData?.recipe?.ingredients?.map((ingredient, index) => (
+                            <li key={index} className="flex gap-2 text-gray-700 border-b border-gray-100 pb-2">
+                                <span className="font-semibold text-black min-w-fit">
+                                    {ingredient.quantity} {ingredient.unit}
+                                </span>
+                                <span>{ingredient.description}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </div>
         </div>
-    );
+    )
 }

@@ -11,7 +11,7 @@ export default function RecipeItem({ item }) {
             </div>
             <div className="flex flex-col gap-2">
                 <span className="text-sm text-red-700 font-medium  uppercase tracking-wide">{item.publisher}</span>
-                <h3 className="font-bold text-lg truncate text-black">{item.title}</h3>
+                <h3 className="font-bold text-lg  line-clamp-2  min-h-[3.5rem] text-black">{item.title}</h3>
                 <Link to={`/recipe-item/${item?.id}`}
                     className='text-sm p-3 px-8 rounded-lg uppercase mt-5 font-medium tracking-wider inline-block shadow-md bg-black text-white  hover:bg-gray-800 transition-colors duration-300'>Recipe Details</Link>
             </div>
