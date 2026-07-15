@@ -24,7 +24,7 @@ export default function Details() {
         }
 
         getRecipeDetails();
-    }, [id]);
+    }, [id,setRecipeDetailsData]);
 
     const recipe = recipeDetailsData?.recipe;
 
